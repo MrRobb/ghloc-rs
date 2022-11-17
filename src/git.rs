@@ -1,9 +1,9 @@
-use git2::{
-	build::{CheckoutBuilder, RepoBuilder},
-	FetchOptions, RemoteCallbacks,
-};
+use std::cell::RefCell;
+use std::path::Path;
+
+use git2::build::{CheckoutBuilder, RepoBuilder};
+use git2::{FetchOptions, RemoteCallbacks};
 use indicatif::{ProgressBar, ProgressStyle};
-use std::{cell::RefCell, path::Path};
 use url::Url;
 
 pub fn clone(repo: &Url, path: &Path) {

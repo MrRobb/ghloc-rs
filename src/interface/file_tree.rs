@@ -43,9 +43,11 @@ impl<'a> StatefulTree<'a> {
 				let d2_is_dir = d2.path().is_dir();
 				if d1_is_dir && !d2_is_dir {
 					std::cmp::Ordering::Less
-				} else if !d1_is_dir && d2_is_dir {
+				}
+				else if !d1_is_dir && d2_is_dir {
 					std::cmp::Ordering::Greater
-				} else {
+				}
+				else {
 					// Sort by name
 					d1.file_name().cmp(&d2.file_name())
 				}
@@ -55,7 +57,8 @@ impl<'a> StatefulTree<'a> {
 				let file_name = path.file_name().unwrap().to_string_lossy().to_string();
 				if path.is_dir() {
 					TreeItem::new(file_name, Self::get_tree_from_path(e.path()))
-				} else {
+				}
+				else {
 					TreeItem::new_leaf(file_name)
 				}
 			})

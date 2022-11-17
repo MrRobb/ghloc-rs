@@ -1,19 +1,17 @@
-use self::file_tree::StatefulTree;
-use crossterm::{
-	event::{self, DisableMouseCapture, EnableMouseCapture, Event, KeyCode},
-	execute,
-	terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
-};
 use std::io;
+
+use crossterm::event::{self, DisableMouseCapture, EnableMouseCapture, Event, KeyCode};
+use crossterm::execute;
+use crossterm::terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen};
 use tempfile::TempDir;
 use tokei::Languages;
-use tui::{
-	backend::{Backend, CrosstermBackend},
-	style::{Color, Modifier, Style},
-	widgets::{Block, Borders},
-	Terminal,
-};
+use tui::backend::{Backend, CrosstermBackend};
+use tui::style::{Color, Modifier, Style};
+use tui::widgets::{Block, Borders};
+use tui::Terminal;
 use tui_tree_widget::Tree;
+
+use self::file_tree::StatefulTree;
 
 mod file_tree;
 
