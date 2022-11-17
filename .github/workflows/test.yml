@@ -2,9 +2,7 @@ name: Rust
 
 on:
   push:
-    branches: ["master"]
   pull_request:
-    branches: ["master"]
 
 env:
   CARGO_TERM_COLOR: always
@@ -30,6 +28,7 @@ jobs:
           args: --all -- --check
 
   test:
+    name: Test
     runs-on: ubuntu-latest
 
     steps:
