@@ -19,5 +19,5 @@ fn main() {
 	languages.get_statistics(&[tempdir.path()], &[], &config);
 
 	// Display the results
-	interface::display(tempdir, languages);
+	interface::display(tempdir, &languages);
 }

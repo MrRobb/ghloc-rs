@@ -17,6 +17,7 @@ impl<'a> StatefulTree<'a> {
 		}
 	}
 
+	#[allow(dead_code)]
 	pub fn with_items(items: Vec<TreeItem<'a>>) -> Self {
 		Self {
 			state: TreeState::default(),

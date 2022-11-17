@@ -66,7 +66,7 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut app: App) -> io::Result<(
 	}
 }
 
-pub fn display(tempdir: TempDir, report: Languages) {
+pub fn display(tempdir: TempDir, _report: &Languages) {
 	// Terminal initialization
 	enable_raw_mode().unwrap();
 	let mut stdout = io::stdout();
