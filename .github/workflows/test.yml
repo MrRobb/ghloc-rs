@@ -1,0 +1,54 @@
+name: Rust
+
+on:
+  push:
+    branches: ["master"]
+  pull_request:
+    branches: ["master"]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  format:
+    name: Format
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      # Setup toolchain
+      - name: Setup toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly
+
+      # Check formatting
+      - uses: actions-rs/cargo@v1
+        with:
+          command: fmt
+          toolchain: nightly
+          args: --all -- --check
+
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      # Setup toolchain
+      - name: Setup toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+
+      # Test
+      - name: Run tests
+        run: cargo test -- --test-threads=1
+
+      # Code coverage
+      # - name: Codecov
+      #   uses: codecov/codecov-action@v3.1.1
+      #   with:
+      #     token: ${{ secrets.CODECOV_TOKEN }}
+      #     fail_ci_if_error: true
+      #     verbose: true
