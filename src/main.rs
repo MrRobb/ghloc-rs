@@ -1,7 +1,6 @@
 #![allow(clippy::use_self)]
 
 use clap::Parser;
-use tokei::Languages;
 
 mod cli;
 mod git;
@@ -11,15 +10,16 @@ fn main() {
 	// Get args
 	let matches = cli::Args::parse();
 
-	// Clone the repo
+	// Create temporary directory
 	let tempdir = tempfile::tempdir().unwrap();
-	git::clone(&matches.url, tempdir.path());
 
-	// Analyse the repo
-	let config = tokei::Config::default();
-	let mut languages = Languages::new();
-	languages.get_statistics(&[tempdir.path()], &[], &config);
+	// Create directory with the name of the repo
+	let repo_name = matches.url.as_str().split('/').last().unwrap();
+	let repo_path = tempdir.path().join(repo_name);
+
+	// Clone the repo
+	git::clone(&matches.url, &repo_path);
 
 	// Display the results
-	interface::display(tempdir, &languages);
+	interface::display(repo_path);
 }

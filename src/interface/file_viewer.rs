@@ -10,52 +10,33 @@ use tui::{
 	Frame,
 };
 
-pub struct StatefulList<T>
-where
-	T: Clone,
-	Spans<'static>: From<T>,
-{
+pub struct StatefulList {
+	pub root_dir: PathBuf,
+	pub current_dir: PathBuf,
 	pub state: ListState,
-	pub items: Vec<T>,
+	pub items: Vec<String>,
 }
 
-impl<T> StatefulList<T>
-where
-	T: Clone,
-	Spans<'static>: From<T>,
-{
-	#[allow(dead_code)]
-	pub fn with_items(items: Vec<T>) -> StatefulList<T> {
-		StatefulList {
+impl StatefulList {
+	pub fn new(root_dir: PathBuf) -> Self {
+		Self {
+			root_dir,
+			current_dir: PathBuf::new(),
 			state: ListState::default(),
-			items,
+			items: Vec::new(),
 		}
 	}
 
-	pub fn from_path(path: PathBuf) -> StatefulList<String> {
-		let mut state = ListState::default();
-		state.select(Some(0));
-		StatefulList::<String> {
-			state,
-			items: fs::read_dir(path)
-				.unwrap()
-				.filter_map(std::result::Result::ok)
-				.sorted_by(|d1, d2| {
-					// Sort directories first
-					let d1_is_dir = d1.path().is_dir();
-					let d2_is_dir = d2.path().is_dir();
-					if d1_is_dir && !d2_is_dir {
-						std::cmp::Ordering::Less
-					} else if !d1_is_dir && d2_is_dir {
-						std::cmp::Ordering::Greater
-					} else {
-						// Sort by name
-						d1.file_name().cmp(&d2.file_name())
-					}
-				})
-				.map(|e| e.path().file_name().unwrap().to_string_lossy().to_string())
-				.collect(),
-		}
+	pub fn from_path(path: PathBuf) -> StatefulList {
+		let mut list = Self::new(path.parent().unwrap().to_path_buf());
+		list.change_directory(path);
+		list
+	}
+
+	pub fn current_directory(&self) -> PathBuf {
+		let mut path = self.root_dir.clone();
+		path.push(&self.current_dir);
+		path
 	}
 
 	pub fn first(&mut self) {
@@ -110,11 +91,80 @@ where
 
 		// Create a List from all list items and highlight the currently selected one
 		let items = List::new(items)
-			.block(Block::default().borders(Borders::ALL).title("List"))
-			.highlight_style(Style::default().bg(Color::LightGreen).add_modifier(Modifier::BOLD))
-			.highlight_symbol(">> ");
+			.block(
+				Block::default()
+					.borders(Borders::ALL)
+					.title(self.current_dir.to_string_lossy().to_string()),
+			)
+			.highlight_style(Style::default().bg(Color::LightGreen).add_modifier(Modifier::BOLD));
 
 		// We can now render the item list
 		f.render_stateful_widget(items, area, &mut self.state);
+	}
+
+	pub fn go_down(&mut self) -> PathBuf {
+		// Build selected path
+		let selected = self.state.selected().unwrap();
+		let selected = &self.items.get(selected).unwrap();
+		let path = self.current_directory();
+		let new_path = path.join(selected);
+
+		// Check if path is a directory
+		if !new_path.is_dir() {
+			return path;
+		}
+
+		// Update state
+		self.change_directory(new_path.clone());
+
+		// Return new path
+		new_path
+	}
+
+	pub fn go_up(&mut self) -> PathBuf {
+		// Build selected path
+		let path = self.current_directory();
+		let new_path = path.parent().unwrap().to_path_buf();
+
+		// Check if new_path is the root
+		if new_path == self.root_dir {
+			return path;
+		}
+
+		// Update state
+		self.change_directory(new_path.clone());
+
+		// Return new path
+		new_path
+	}
+
+	pub fn change_directory(&mut self, path: PathBuf) {
+		// Update state
+		let mut state = ListState::default();
+		state.select(Some(0));
+		self.state = state;
+
+		// Update current directory
+		self.current_dir = path.strip_prefix(&self.root_dir).unwrap().to_path_buf();
+
+		// Update items
+		self.items = fs::read_dir(&path)
+			.unwrap()
+			.filter_map(std::result::Result::ok)
+			.sorted_by(|d1, d2| {
+				// Sort directories first
+				let d1_is_dir = d1.path().is_dir();
+				let d2_is_dir = d2.path().is_dir();
+				if d1_is_dir && !d2_is_dir {
+					std::cmp::Ordering::Less
+				} else if !d1_is_dir && d2_is_dir {
+					std::cmp::Ordering::Greater
+				} else {
+					// Sort by name
+					d1.file_name().cmp(&d2.file_name())
+				}
+			})
+			.map(|e| e.path().file_name().unwrap().to_string_lossy().to_string())
+			.collect();
 	}
 }

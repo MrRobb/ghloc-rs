@@ -1,10 +1,8 @@
-use std::io;
+use std::{io, path::PathBuf};
 
 use crossterm::event::{self, DisableMouseCapture, EnableMouseCapture, Event, KeyCode};
 use crossterm::execute;
 use crossterm::terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen};
-use tempfile::TempDir;
-use tokei::Languages;
 use tui::Terminal;
 use tui::{
 	backend::{Backend, CrosstermBackend},
@@ -12,21 +10,21 @@ use tui::{
 	Frame,
 };
 
-use self::file_viewer::StatefulList;
+use self::{code_report::CodeReport, file_viewer::StatefulList};
 
-mod file_tree;
+mod code_report;
 mod file_viewer;
 
 pub struct App {
-	pub current_dir: TempDir,
-	pub file_tree: StatefulList<String>,
+	pub file_tree: StatefulList,
+	pub code_report: CodeReport,
 }
 
 impl App {
-	fn new(tempdir: TempDir) -> Self {
+	fn new(path: PathBuf) -> Self {
 		App {
-			file_tree: StatefulList::<String>::from_path(tempdir.path().to_path_buf()),
-			current_dir: tempdir,
+			code_report: CodeReport::from_path(&path),
+			file_tree: StatefulList::from_path(path),
 		}
 	}
 }
@@ -39,6 +37,7 @@ fn ui<B: Backend>(f: &mut Frame<B>, app: &mut App) {
 		.split(f.size());
 
 	app.file_tree.render(f, chunks[0]);
+	app.code_report.render(f, chunks[1]);
 }
 
 fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut app: App) -> io::Result<()> {
@@ -52,13 +51,21 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut app: App) -> io::Result<(
 				KeyCode::Up => app.file_tree.previous(),
 				KeyCode::Home => app.file_tree.first(),
 				KeyCode::End => app.file_tree.last(),
+				KeyCode::Enter => {
+					let new_dir = app.file_tree.go_down();
+					app.code_report.change_path(&new_dir);
+				},
+				KeyCode::Backspace | KeyCode::Esc | KeyCode::Left => {
+					let new_dir = app.file_tree.go_up();
+					app.code_report.change_path(&new_dir);
+				},
 				_ => {},
 			}
 		}
 	}
 }
 
-pub fn display(tempdir: TempDir, _report: &Languages) {
+pub fn display(tempdir: PathBuf) {
 	// Terminal initialization
 	enable_raw_mode().unwrap();
 	let mut stdout = io::stdout();
