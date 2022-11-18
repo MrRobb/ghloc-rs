@@ -77,3 +77,30 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           fail_ci_if_error: true
           verbose: true
+
+  unused:
+    name: Unused dependencies
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout repository
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # Setup toolchain
+      - name: Setup toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly
+
+      # Install cargo-udeps
+      - name: Install cargo-udeps
+        uses: actions-rs/install@v0.1
+        with:
+          crate: cargo-udeps
+          version: latest
+          use-tool-cache: true
+
+      # Check for unused dependencies
+      - name: Check for unused dependencies
+        run: cargo +nightly udeps
