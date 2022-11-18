@@ -1,16 +1,15 @@
-use std::{io, path::Path};
+use std::io;
+use std::path::Path;
 
 use crossterm::event::{self, DisableMouseCapture, EnableMouseCapture, Event, KeyCode};
 use crossterm::execute;
 use crossterm::terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen};
-use tui::Terminal;
-use tui::{
-	backend::{Backend, CrosstermBackend},
-	layout::{Constraint, Direction, Layout},
-	Frame,
-};
+use tui::backend::{Backend, CrosstermBackend};
+use tui::layout::{Constraint, Direction, Layout};
+use tui::{Frame, Terminal};
 
-use self::{code_report::CodeReport, file_viewer::StatefulList};
+use self::code_report::CodeReport;
+use self::file_viewer::StatefulList;
 
 mod code_report;
 mod file_viewer;

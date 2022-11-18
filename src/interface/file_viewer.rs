@@ -1,17 +1,13 @@
-use std::{
-	fs,
-	path::{Path, PathBuf},
-};
+use std::fs;
+use std::path::{Path, PathBuf};
 
 use itertools::Itertools;
-use tui::{
-	backend::Backend,
-	layout::{Alignment, Rect},
-	style::{Color, Modifier, Style},
-	text::{Span, Spans},
-	widgets::{Block, Borders, List, ListItem, ListState},
-	Frame,
-};
+use tui::backend::Backend;
+use tui::layout::{Alignment, Rect};
+use tui::style::{Color, Modifier, Style};
+use tui::text::{Span, Spans};
+use tui::widgets::{Block, Borders, List, ListItem, ListState};
+use tui::Frame;
 
 pub struct StatefulList {
 	pub root_dir: PathBuf,
@@ -55,7 +51,8 @@ impl StatefulList {
 			Some(i) => {
 				if i >= self.items.len() - 1 {
 					0
-				} else {
+				}
+				else {
 					i + 1
 				}
 			},
@@ -69,7 +66,8 @@ impl StatefulList {
 			Some(i) => {
 				if i == 0 {
 					self.items.len() - 1
-				} else {
+				}
+				else {
 					i - 1
 				}
 			},
@@ -87,11 +85,14 @@ impl StatefulList {
 			.iter()
 			.map(|i| {
 				let filename = i.file_name().unwrap().to_string_lossy().to_string();
-				let span = Span::from(if i.is_dir() {
-					format!("📁 {filename}")
-				} else {
-					format!("📄 {filename}")
-				});
+				let span = Span::from(
+					if i.is_dir() {
+						format!("📁 {filename}")
+					}
+					else {
+						format!("📄 {filename}")
+					},
+				);
 				let mut style = Style::default();
 				if i.is_dir() {
 					style = style.fg(Color::Yellow).add_modifier(Modifier::BOLD);
@@ -186,9 +187,11 @@ impl StatefulList {
 				let d2_is_dir = d2.path().is_dir();
 				if d1_is_dir && !d2_is_dir {
 					std::cmp::Ordering::Less
-				} else if !d1_is_dir && d2_is_dir {
+				}
+				else if !d1_is_dir && d2_is_dir {
 					std::cmp::Ordering::Greater
-				} else {
+				}
+				else {
 					// Sort by name
 					d1.file_name().cmp(&d2.file_name())
 				}

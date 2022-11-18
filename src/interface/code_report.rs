@@ -2,14 +2,12 @@ use std::path::{Path, PathBuf};
 
 use itertools::Itertools;
 use tokei::Languages;
-use tui::{
-	backend::Backend,
-	layout::{Alignment, Rect},
-	style::{Color, Modifier, Style},
-	text::{Span, Spans},
-	widgets::{BarChart, Block, Borders},
-	Frame,
-};
+use tui::backend::Backend;
+use tui::layout::{Alignment, Rect};
+use tui::style::{Color, Modifier, Style};
+use tui::text::{Span, Spans};
+use tui::widgets::{BarChart, Block, Borders};
+use tui::Frame;
 
 pub struct CodeReport {
 	pub report: Languages,
