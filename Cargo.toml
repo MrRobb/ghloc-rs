@@ -1,13 +1,13 @@
 [package]
-name = "ghloc-rs"
+name = "ghloc"
 version = "0.1.0"
 edition = "2021"
 authors = ["Roberto Ariosa <rob.ariosa@hotmail.com>"]
 license = "MIT/Apache-2.0"
-description = "..."
-repository = "https://github.com/MrRobb/..."
-keywords = ["..."]
-categories = ["..."]
+description = "List the lines of code of a GitHub repository."
+repository = "https://github.com/MrRobb/ghloc-rs"
+keywords = ["utility", "cli", "cloc", "lines", "statistics"]
+categories = ["command-line-utilities", "visualization"]
 readme = "README.md"
 rust-version = "1.56"
 
@@ -21,7 +21,7 @@ tokei = "12.1"
 
 # CLI
 clap = { version = "4.0", features = ["derive"] }
-url = { version = "2.2", features = ["serde"] }
+url = { version = "2.3", features = ["serde"] }
 
 # Filesystem
 git2 = "0.15"
