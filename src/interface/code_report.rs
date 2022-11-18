@@ -1,5 +1,6 @@
 use std::path::{Path, PathBuf};
 
+use itertools::Itertools;
 use tokei::Languages;
 use tui::{
 	backend::Backend,
@@ -42,6 +43,7 @@ impl CodeReport {
 		let items: Vec<ListItem> = self
 			.report
 			.iter()
+			.sorted_by(|(_, lang1), (_, lang2)| lang1.code.cmp(&lang2.code).reverse())
 			.map(|(lang_type, lang)| {
 				let lines = vec![Spans::from(format!("{}: {}", lang_type, lang.code))];
 				ListItem::new(lines).style(Style::default().fg(Color::Black).bg(Color::White))
