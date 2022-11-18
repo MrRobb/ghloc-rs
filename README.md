@@ -29,6 +29,7 @@ ghloc "https://github.com/MrRobb/ghloc-rs"
   - [ ] File selection.
   - [ ] Local repository support.
   - [ ] Git authentication.
+  - [ ] Add comments and blank space to the output.
 - [ ] UI:
   - [ ] Inline statistics.
   - [ ] Percentages.
