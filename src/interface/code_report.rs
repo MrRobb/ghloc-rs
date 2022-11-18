@@ -4,11 +4,10 @@ use itertools::Itertools;
 use tokei::Languages;
 use tui::{
 	backend::Backend,
-	layout::{Alignment, Direction, Layout, Rect},
+	layout::{Alignment, Rect},
 	style::{Color, Modifier, Style},
-	symbols::bar::Set,
 	text::{Span, Spans},
-	widgets::{BarChart, Block, Borders, List, ListItem},
+	widgets::{BarChart, Block, Borders},
 	Frame,
 };
 
@@ -69,7 +68,7 @@ impl CodeReport {
 					.title_alignment(Alignment::Center),
 			)
 			.data(binding.as_slice())
-			.bar_width(max_label_size as u16)
+			.bar_width(u16::try_from(max_label_size).unwrap_or(5))
 			.bar_gap(3)
 			.bar_style(Style::default().fg(Color::Yellow))
 			.value_style(Style::default().bg(Color::Yellow).add_modifier(Modifier::BOLD));
