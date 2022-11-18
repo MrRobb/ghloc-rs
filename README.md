@@ -30,7 +30,7 @@ ghloc "https://github.com/MrRobb/ghloc-rs"
   - [ ] Get rid of `unwrap()`.
   - [ ] Add [no_panic](https://docs.rs/no-panic/).
 - [ ] Code:
-  - [ ] File selection.
+  - [x] File selection.
   - [ ] Local repository support.
   - [ ] Git authentication.
   - [ ] Add comments and blank space to the output.

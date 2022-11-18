@@ -10,6 +10,7 @@ use tui::widgets::{Block, Borders, List, ListItem, ListState};
 use tui::Frame;
 
 pub struct StatefulList {
+	pub selected: Option<usize>,
 	pub root_dir: PathBuf,
 	pub current_dir: PathBuf,
 	pub state: ListState,
@@ -20,6 +21,7 @@ impl StatefulList {
 	pub fn new(root_dir: PathBuf) -> Self {
 		Self {
 			root_dir,
+			selected: None,
 			current_dir: PathBuf::new(),
 			state: ListState::default(),
 			items: Vec::new(),
@@ -51,8 +53,7 @@ impl StatefulList {
 			Some(i) => {
 				if i >= self.items.len() - 1 {
 					0
-				}
-				else {
+				} else {
 					i + 1
 				}
 			},
@@ -66,8 +67,7 @@ impl StatefulList {
 			Some(i) => {
 				if i == 0 {
 					self.items.len() - 1
-				}
-				else {
+				} else {
 					i - 1
 				}
 			},
@@ -83,22 +83,23 @@ impl StatefulList {
 		let items: Vec<ListItem> = self
 			.items
 			.iter()
-			.map(|i| {
-				let filename = i.file_name().unwrap().to_string_lossy().to_string();
-				let span = Span::from(
-					if i.is_dir() {
-						format!("📁 {filename}")
-					}
-					else {
-						format!("📄 {filename}")
-					},
-				);
+			.enumerate()
+			.map(|(i, path)| {
+				let filename = path.file_name().unwrap().to_string_lossy().to_string();
+				let span = Span::from(if path.is_dir() {
+					format!("📁 {filename}")
+				} else {
+					format!("📄 {filename}")
+				});
 				let mut style = Style::default();
-				if i.is_dir() {
+				if path.is_dir() {
 					style = style.fg(Color::Yellow).add_modifier(Modifier::BOLD);
 				}
 				if filename.starts_with('.') {
 					style = style.add_modifier(Modifier::DIM);
+				}
+				if Some(i) == self.selected {
+					style = style.add_modifier(Modifier::REVERSED);
 				}
 				ListItem::new(span).style(style)
 			})
@@ -139,16 +140,12 @@ impl StatefulList {
 		let path = self.current_directory();
 		let new_path = path.join(selected);
 
-		// Check if path is a directory
-		if !new_path.is_dir() {
-			return path;
-		}
-
 		// Update state
-		self.change_directory(&new_path);
-
-		// Return new path
-		new_path
+		if new_path.is_dir() {
+			self.change_directory(&new_path)
+		} else {
+			self.select_file(&new_path)
+		}
 	}
 
 	pub fn go_up(&mut self) -> PathBuf {
@@ -168,7 +165,17 @@ impl StatefulList {
 		new_path
 	}
 
-	pub fn change_directory(&mut self, path: &Path) {
+	fn select_file(&mut self, path: &Path) -> PathBuf {
+		if self.selected == self.state.selected() {
+			self.selected = None;
+			path.parent().unwrap().to_path_buf()
+		} else {
+			self.selected = self.state.selected();
+			path.to_path_buf()
+		}
+	}
+
+	pub fn change_directory(&mut self, path: &Path) -> PathBuf {
 		// Update state
 		let mut state = ListState::default();
 		state.select(Some(0));
@@ -176,6 +183,9 @@ impl StatefulList {
 
 		// Update current directory
 		self.current_dir = path.strip_prefix(&self.root_dir).unwrap().to_path_buf();
+
+		// Clear selected files
+		self.selected = None;
 
 		// Update items
 		self.items = fs::read_dir(path)
@@ -187,16 +197,16 @@ impl StatefulList {
 				let d2_is_dir = d2.path().is_dir();
 				if d1_is_dir && !d2_is_dir {
 					std::cmp::Ordering::Less
-				}
-				else if !d1_is_dir && d2_is_dir {
+				} else if !d1_is_dir && d2_is_dir {
 					std::cmp::Ordering::Greater
-				}
-				else {
+				} else {
 					// Sort by name
 					d1.file_name().cmp(&d2.file_name())
 				}
 			})
 			.map(|e| e.path())
 			.collect();
+
+		path.to_path_buf()
 	}
 }
