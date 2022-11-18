@@ -1,4 +1,7 @@
-use std::{fs, path::PathBuf};
+use std::{
+	fs,
+	path::{Path, PathBuf},
+};
 
 use itertools::Itertools;
 use tui::{
@@ -27,7 +30,7 @@ impl StatefulList {
 		}
 	}
 
-	pub fn from_path(path: PathBuf) -> StatefulList {
+	pub fn from_path(path: &Path) -> StatefulList {
 		let mut list = Self::new(path.parent().unwrap().to_path_buf());
 		list.change_directory(path);
 		list
@@ -115,7 +118,7 @@ impl StatefulList {
 		}
 
 		// Update state
-		self.change_directory(new_path.clone());
+		self.change_directory(&new_path);
 
 		// Return new path
 		new_path
@@ -132,13 +135,13 @@ impl StatefulList {
 		}
 
 		// Update state
-		self.change_directory(new_path.clone());
+		self.change_directory(&new_path);
 
 		// Return new path
 		new_path
 	}
 
-	pub fn change_directory(&mut self, path: PathBuf) {
+	pub fn change_directory(&mut self, path: &Path) {
 		// Update state
 		let mut state = ListState::default();
 		state.select(Some(0));
@@ -148,7 +151,7 @@ impl StatefulList {
 		self.current_dir = path.strip_prefix(&self.root_dir).unwrap().to_path_buf();
 
 		// Update items
-		self.items = fs::read_dir(&path)
+		self.items = fs::read_dir(path)
 			.unwrap()
 			.filter_map(std::result::Result::ok)
 			.sorted_by(|d1, d2| {

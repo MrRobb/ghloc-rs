@@ -21,5 +21,5 @@ fn main() {
 	git::clone(&matches.url, &repo_path);
 
 	// Display the results
-	interface::display(repo_path);
+	interface::display(&repo_path);
 }

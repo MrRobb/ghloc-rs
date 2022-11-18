@@ -1,4 +1,4 @@
-use std::{io, path::PathBuf};
+use std::{io, path::Path};
 
 use crossterm::event::{self, DisableMouseCapture, EnableMouseCapture, Event, KeyCode};
 use crossterm::execute;
@@ -21,9 +21,9 @@ pub struct App {
 }
 
 impl App {
-	fn new(path: PathBuf) -> Self {
+	fn new(path: &Path) -> Self {
 		App {
-			code_report: CodeReport::from_path(&path),
+			code_report: CodeReport::from_path(path),
 			file_tree: StatefulList::from_path(path),
 		}
 	}
@@ -65,7 +65,7 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut app: App) -> io::Result<(
 	}
 }
 
-pub fn display(tempdir: PathBuf) {
+pub fn display(tempdir: &Path) {
 	// Terminal initialization
 	enable_raw_mode().unwrap();
 	let mut stdout = io::stdout();
