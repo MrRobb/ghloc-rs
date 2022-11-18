@@ -40,17 +40,6 @@ impl CodeReport {
 	}
 
 	pub fn render<B: Backend>(&mut self, f: &mut Frame<B>, area: Rect) {
-		// Iterate through all elements in the `items` app and append some debug text to it.
-		let items: Vec<ListItem> = self
-			.report
-			.iter()
-			.sorted_by(|(_, lang1), (_, lang2)| lang1.code.cmp(&lang2.code).reverse())
-			.map(|(lang_type, lang)| {
-				let lines = vec![Spans::from(format!("{}: {}", lang_type, lang.code))];
-				ListItem::new(lines).style(Style::default())
-			})
-			.collect();
-
 		let current_dir = self.current_dir.to_string_lossy().to_string();
 		let style = Style::default()
 			.add_modifier(Modifier::BOLD)
@@ -59,13 +48,6 @@ impl CodeReport {
 			Span::styled("Lines of code in ", style),
 			Span::styled(current_dir, style.fg(Color::Yellow)),
 		]);
-
-		let items = List::new(items).block(
-			Block::default()
-				.borders(Borders::ALL)
-				.title(title)
-				.title_alignment(Alignment::Center),
-		);
 
 		let data = self
 			.report
@@ -83,7 +65,7 @@ impl CodeReport {
 			.block(
 				Block::default()
 					.borders(Borders::ALL)
-					.title("Code by language")
+					.title(title)
 					.title_alignment(Alignment::Center),
 			)
 			.data(binding.as_slice())
