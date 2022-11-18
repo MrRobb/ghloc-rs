@@ -18,3 +18,18 @@ cargo install ghloc
 ```bash
 ghloc "https://github.com/MrRobb/ghloc-rs"
 ```
+
+### TODO
+
+- [ ] CI / CD:
+  - [ ] Add tests.
+  - [ ] Get rid of `unwrap()`.
+  - [ ] Add [no_panic](https://docs.rs/no-panic/).
+- [ ] Code:
+  - [ ] File selection.
+  - [ ] Local repository support.
+  - [ ] Git authentication.
+- [ ] UI:
+  - [ ] Inline statistics.
+  - [ ] Percentages.
+  - [ ] Colors for each bar (using [github-colors](https://github.com/ozh/github-colors)).
