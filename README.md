@@ -7,6 +7,8 @@
 
 We have [tokei](https://crates.io/crates/tokei) and [ghloc.vercel.app](https://ghloc.vercel.app/) for counting lines of code in a GitHub repository. But what if you want to count lines of code in a GitHub repository from the command line? Well, that's what this crate is for.
 
+![CLI Showcase](assets/cli.png)
+
 > Actively maintained! If you have any problem just [create an issue](https://github.com/MrRobb/ghloc-rs/issues/new).
 
 ### Install
