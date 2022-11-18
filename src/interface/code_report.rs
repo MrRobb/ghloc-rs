@@ -4,10 +4,11 @@ use itertools::Itertools;
 use tokei::Languages;
 use tui::{
 	backend::Backend,
-	layout::Rect,
+	layout::{Alignment, Direction, Layout, Rect},
 	style::{Color, Modifier, Style},
-	text::Spans,
-	widgets::{Block, Borders, List, ListItem},
+	symbols::bar::Set,
+	text::{Span, Spans},
+	widgets::{BarChart, Block, Borders, List, ListItem},
 	Frame,
 };
 
@@ -46,20 +47,50 @@ impl CodeReport {
 			.sorted_by(|(_, lang1), (_, lang2)| lang1.code.cmp(&lang2.code).reverse())
 			.map(|(lang_type, lang)| {
 				let lines = vec![Spans::from(format!("{}: {}", lang_type, lang.code))];
-				ListItem::new(lines).style(Style::default().fg(Color::Black).bg(Color::White))
+				ListItem::new(lines).style(Style::default())
 			})
 			.collect();
 
-		// Create a List from all list items and highlight the currently selected one
-		let items = List::new(items)
+		let current_dir = self.current_dir.to_string_lossy().to_string();
+		let style = Style::default()
+			.add_modifier(Modifier::BOLD)
+			.add_modifier(Modifier::UNDERLINED);
+		let title = Spans::from(vec![
+			Span::styled("Lines of code in ", style),
+			Span::styled(current_dir, style.fg(Color::Yellow)),
+		]);
+
+		let items = List::new(items).block(
+			Block::default()
+				.borders(Borders::ALL)
+				.title(title)
+				.title_alignment(Alignment::Center),
+		);
+
+		let data = self
+			.report
+			.iter()
+			.filter(|(_, lang)| lang.code > 0)
+			.sorted_by(|(_, lang1), (_, lang2)| lang1.code.cmp(&lang2.code).reverse())
+			.map(|(lang_type, lang)| (lang_type.to_string(), lang.code as u64))
+			.collect::<Vec<_>>();
+		let binding = data
+			.iter()
+			.map(|(lang_type, loc)| (lang_type.as_str(), *loc))
+			.collect::<Vec<_>>();
+		let max_label_size = data.iter().map(|(lang_type, _)| lang_type.len()).max().unwrap_or(0);
+		let barchart = BarChart::default()
 			.block(
 				Block::default()
 					.borders(Borders::ALL)
-					.title(self.current_dir.to_string_lossy().to_string()),
+					.title("Code by language")
+					.title_alignment(Alignment::Center),
 			)
-			.highlight_style(Style::default().bg(Color::LightGreen).add_modifier(Modifier::BOLD));
-
-		// We can now render the item list
-		f.render_widget(items, area);
+			.data(binding.as_slice())
+			.bar_width(max_label_size as u16)
+			.bar_gap(3)
+			.bar_style(Style::default().fg(Color::Yellow))
+			.value_style(Style::default().bg(Color::Yellow).add_modifier(Modifier::BOLD));
+		f.render_widget(barchart, area);
 	}
 }

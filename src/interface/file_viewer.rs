@@ -6,9 +6,9 @@ use std::{
 use itertools::Itertools;
 use tui::{
 	backend::Backend,
-	layout::Rect,
+	layout::{Alignment, Rect},
 	style::{Color, Modifier, Style},
-	text::Spans,
+	text::{Span, Spans},
 	widgets::{Block, Borders, List, ListItem, ListState},
 	Frame,
 };
@@ -17,7 +17,7 @@ pub struct StatefulList {
 	pub root_dir: PathBuf,
 	pub current_dir: PathBuf,
 	pub state: ListState,
-	pub items: Vec<String>,
+	pub items: Vec<PathBuf>,
 }
 
 impl StatefulList {
@@ -82,26 +82,52 @@ impl StatefulList {
 	where
 		B: Backend,
 	{
-		// Iterate through all elements in the `items` app and append some debug text to it.
 		let items: Vec<ListItem> = self
 			.items
 			.iter()
 			.map(|i| {
-				let lines = vec![Spans::from(i.clone())];
-				ListItem::new(lines).style(Style::default().fg(Color::Black).bg(Color::White))
+				let filename = i.file_name().unwrap().to_string_lossy().to_string();
+				let span = Span::from(if i.is_dir() {
+					format!("📁 {filename}")
+				} else {
+					format!("📄 {filename}")
+				});
+				let mut style = Style::default();
+				if i.is_dir() {
+					style = style.fg(Color::Yellow).add_modifier(Modifier::BOLD);
+				}
+				if filename.starts_with('.') {
+					style = style.add_modifier(Modifier::DIM);
+				}
+				ListItem::new(span).style(style)
 			})
 			.collect();
 
-		// Create a List from all list items and highlight the currently selected one
+		let current_dir = self.current_dir.to_string_lossy().to_string();
+		let title = Spans::from(vec![
+			Span::styled(
+				"Files in ",
+				Style::default()
+					.add_modifier(Modifier::BOLD)
+					.add_modifier(Modifier::UNDERLINED),
+			),
+			Span::styled(
+				current_dir,
+				Style::default()
+					.fg(Color::Yellow)
+					.add_modifier(Modifier::BOLD)
+					.add_modifier(Modifier::UNDERLINED),
+			),
+		]);
 		let items = List::new(items)
 			.block(
 				Block::default()
 					.borders(Borders::ALL)
-					.title(self.current_dir.to_string_lossy().to_string()),
+					.title(title)
+					.title_alignment(Alignment::Center),
 			)
 			.highlight_style(Style::default().bg(Color::LightGreen).add_modifier(Modifier::BOLD));
 
-		// We can now render the item list
 		f.render_stateful_widget(items, area, &mut self.state);
 	}
 
@@ -167,7 +193,7 @@ impl StatefulList {
 					d1.file_name().cmp(&d2.file_name())
 				}
 			})
-			.map(|e| e.path().file_name().unwrap().to_string_lossy().to_string())
+			.map(|e| e.path())
 			.collect();
 	}
 }
