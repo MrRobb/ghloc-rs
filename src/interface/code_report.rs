@@ -69,7 +69,12 @@ impl CodeReport {
 			.bar_width(u16::try_from(max_label_size).unwrap_or(5))
 			.bar_gap(3)
 			.bar_style(Style::default().fg(Color::Yellow))
-			.value_style(Style::default().bg(Color::Yellow).add_modifier(Modifier::BOLD));
+			.value_style(
+				Style::default()
+					.fg(Color::Black)
+					.bg(Color::Yellow)
+					.add_modifier(Modifier::BOLD),
+			);
 		f.render_widget(barchart, area);
 	}
 }
