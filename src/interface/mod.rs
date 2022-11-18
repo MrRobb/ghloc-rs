@@ -5,57 +5,51 @@ use crossterm::execute;
 use crossterm::terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen};
 use tempfile::TempDir;
 use tokei::Languages;
-use tui::backend::{Backend, CrosstermBackend};
-use tui::style::{Color, Modifier, Style};
-use tui::widgets::{Block, Borders};
 use tui::Terminal;
-use tui_tree_widget::Tree;
+use tui::{
+	backend::{Backend, CrosstermBackend},
+	layout::{Constraint, Direction, Layout},
+	Frame,
+};
 
-use self::file_tree::StatefulTree;
+use self::file_viewer::StatefulList;
 
 mod file_tree;
+mod file_viewer;
 
-struct App<'a> {
-	file_tree: StatefulTree<'a>,
+pub struct App {
+	pub current_dir: TempDir,
+	pub file_tree: StatefulList<String>,
 }
 
-impl<'a> App<'a> {
+impl App {
 	fn new(tempdir: TempDir) -> Self {
 		App {
-			file_tree: StatefulTree::from_path(tempdir.into_path()),
+			file_tree: StatefulList::<String>::from_path(tempdir.path().to_path_buf()),
+			current_dir: tempdir,
 		}
 	}
 }
 
+fn ui<B: Backend>(f: &mut Frame<B>, app: &mut App) {
+	// Create two chunks with equal horizontal screen space
+	let chunks = Layout::default()
+		.direction(Direction::Horizontal)
+		.constraints([Constraint::Percentage(50), Constraint::Percentage(50)].as_ref())
+		.split(f.size());
+
+	app.file_tree.render(f, chunks[0]);
+}
+
 fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut app: App) -> io::Result<()> {
 	loop {
-		terminal.draw(|f| {
-			let area = f.size();
-
-			let items = Tree::new(app.file_tree.items.clone())
-				.block(
-					Block::default()
-						.borders(Borders::ALL)
-						.title(format!("Tree Widget {:?}", app.file_tree.state)),
-				)
-				.highlight_style(
-					Style::default()
-						.fg(Color::Black)
-						.bg(Color::LightGreen)
-						.add_modifier(Modifier::BOLD),
-				)
-				.highlight_symbol(">> ");
-			f.render_stateful_widget(items, area, &mut app.file_tree.state);
-		})?;
+		terminal.draw(|f| ui(f, &mut app))?;
 
 		if let Event::Key(key) = event::read()? {
 			match key.code {
 				KeyCode::Char('q') => return Ok(()),
-				KeyCode::Char('\n' | ' ') => app.file_tree.toggle(),
-				KeyCode::Left => app.file_tree.left(),
-				KeyCode::Right => app.file_tree.right(),
-				KeyCode::Down => app.file_tree.down(),
-				KeyCode::Up => app.file_tree.up(),
+				KeyCode::Down => app.file_tree.next(),
+				KeyCode::Up => app.file_tree.previous(),
 				KeyCode::Home => app.file_tree.first(),
 				KeyCode::End => app.file_tree.last(),
 				_ => {},

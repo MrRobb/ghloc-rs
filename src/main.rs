@@ -1,3 +1,5 @@
+#![allow(clippy::use_self)]
+
 use clap::Parser;
 use tokei::Languages;
 
