@@ -23,7 +23,7 @@ clap = { version = "4.0", features = ["derive"] }
 url = { version = "2.3", features = ["serde"] }
 
 # Filesystem
-git2 = "0.15"
+git2 = { version = "0.15", features = ["vendored-openssl"] }
 tempfile = "3.3"
 
 # Terminal
@@ -33,4 +33,3 @@ tui = "0.19.0"
 
 # Utils
 itertools = "0.10.5"
-openssl = { version = "0.10.42", features = ["vendored"] }
