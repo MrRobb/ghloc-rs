@@ -53,7 +53,8 @@ impl StatefulList {
 			Some(i) => {
 				if i >= self.items.len() - 1 {
 					0
-				} else {
+				}
+				else {
 					i + 1
 				}
 			},
@@ -67,7 +68,8 @@ impl StatefulList {
 			Some(i) => {
 				if i == 0 {
 					self.items.len() - 1
-				} else {
+				}
+				else {
 					i - 1
 				}
 			},
@@ -86,11 +88,14 @@ impl StatefulList {
 			.enumerate()
 			.map(|(i, path)| {
 				let filename = path.file_name().unwrap().to_string_lossy().to_string();
-				let span = Span::from(if path.is_dir() {
-					format!("📁 {filename}")
-				} else {
-					format!("📄 {filename}")
-				});
+				let span = Span::from(
+					if path.is_dir() {
+						format!("📁 {filename}")
+					}
+					else {
+						format!("📄 {filename}")
+					},
+				);
 				let mut style = Style::default();
 				if path.is_dir() {
 					style = style.fg(Color::Yellow).add_modifier(Modifier::BOLD);
@@ -143,7 +148,8 @@ impl StatefulList {
 		// Update state
 		if new_path.is_dir() {
 			self.change_directory(&new_path)
-		} else {
+		}
+		else {
 			self.select_file(&new_path)
 		}
 	}
@@ -169,7 +175,8 @@ impl StatefulList {
 		if self.selected == self.state.selected() {
 			self.selected = None;
 			path.parent().unwrap().to_path_buf()
-		} else {
+		}
+		else {
 			self.selected = self.state.selected();
 			path.to_path_buf()
 		}
@@ -197,9 +204,11 @@ impl StatefulList {
 				let d2_is_dir = d2.path().is_dir();
 				if d1_is_dir && !d2_is_dir {
 					std::cmp::Ordering::Less
-				} else if !d1_is_dir && d2_is_dir {
+				}
+				else if !d1_is_dir && d2_is_dir {
 					std::cmp::Ordering::Greater
-				} else {
+				}
+				else {
 					// Sort by name
 					d1.file_name().cmp(&d2.file_name())
 				}
